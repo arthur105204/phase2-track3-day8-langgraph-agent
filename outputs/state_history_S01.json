@@ -1,0 +1,77 @@
+{
+  "thread_id": "thread-S01_simple",
+  "checkpoints_newest_first": [
+    {
+      "step": 0,
+      "checkpoint_id": "1f14cf21-1a81-6a7e-8004-70c12645f5a2",
+      "next": [],
+      "route": "simple",
+      "attempt": 0,
+      "events_tail": [
+        "intake",
+        "classify",
+        "answer",
+        "finalize"
+      ]
+    },
+    {
+      "step": 1,
+      "checkpoint_id": "1f14cf21-1a7e-63f3-8003-36c70389b921",
+      "next": [
+        "finalize"
+      ],
+      "route": "simple",
+      "attempt": 0,
+      "events_tail": [
+        "intake",
+        "classify",
+        "answer"
+      ]
+    },
+    {
+      "step": 2,
+      "checkpoint_id": "1f14cf21-1a79-6cae-8002-c05b3139f11d",
+      "next": [
+        "answer"
+      ],
+      "route": "simple",
+      "attempt": 0,
+      "events_tail": [
+        "intake",
+        "classify"
+      ]
+    },
+    {
+      "step": 3,
+      "checkpoint_id": "1f14cf21-1a75-658e-8001-7b8d6961fc24",
+      "next": [
+        "classify"
+      ],
+      "route": "",
+      "attempt": 0,
+      "events_tail": [
+        "intake"
+      ]
+    },
+    {
+      "step": 4,
+      "checkpoint_id": "1f14cf21-1a71-6c45-8000-d919e4206bcd",
+      "next": [
+        "intake"
+      ],
+      "route": "",
+      "attempt": 0,
+      "events_tail": []
+    },
+    {
+      "step": 5,
+      "checkpoint_id": "1f14cf21-1a65-655f-bfff-ee1ea1fce9ff",
+      "next": [
+        "__start__"
+      ],
+      "route": null,
+      "attempt": null,
+      "events_tail": []
+    }
+  ]
+}
