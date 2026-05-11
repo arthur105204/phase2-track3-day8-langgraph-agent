@@ -19,4 +19,4 @@ grade-local:
 	python -m langgraph_agent_lab.cli validate-metrics --metrics outputs/metrics.json
 
 clean:
-	rm -rf .pytest_cache .ruff_cache .mypy_cache htmlcov dist build *.egg-info outputs/*.json
+	rm -rf .pytest_cache .ruff_cache .mypy_cache htmlcov dist build *.egg-info outputs/*.json outputs/*.db outputs/dead_letter.jsonl

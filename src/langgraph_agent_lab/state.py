@@ -6,9 +6,9 @@ Students should extend the schema only when needed. Keep state lean and serializ
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Annotated, Any, TypedDict
-
 from operator import add
+from typing import Annotated, Any, Literal, TypedDict
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -33,16 +33,29 @@ class LabEvent(BaseModel):
 
 
 class ApprovalDecision(BaseModel):
+    """Structured HITL outcome (mock or returned from interrupt())."""
+
     approved: bool = False
     reviewer: str = "mock-reviewer"
     comment: str = ""
+    action: Literal["approve", "reject", "edit"] = "approve"
+    edited_payload: str | None = None
 
 
 class AgentState(TypedDict, total=False):
     """LangGraph state.
 
-    TODO(student): decide which fields should be append-only and which should be overwritten.
-    The current annotations give a safe starting point for auditability.
+    Reducers (append-only via ``Annotated[..., add]``):
+    - ``messages``: short trace strings for debugging.
+    - ``tool_results``: structured JSON lines from tool_node (never mutate in place).
+    - ``errors``: human-readable error strings across retries.
+    - ``events``: serialized ``LabEvent`` dicts for metrics and grading.
+
+    Overwritten each time a node returns an update for that key:
+    - ``thread_id``, ``scenario_id``, ``query`` (intake may normalize ``query``).
+    - ``route``, ``risk_level``, ``attempt``, ``max_attempts`` (routing / retry).
+    - ``final_answer``, ``pending_question``, ``proposed_action``, ``approval``.
+    - ``evaluation_result``: ``needs_retry`` | ``success`` | ``rejected`` — gate for the tool loop.
     """
 
     thread_id: str
@@ -102,6 +115,7 @@ def initial_state(scenario: Scenario) -> AgentState:
     }
 
 
-def make_event(node: str, event_type: str, message: str, **metadata: Any) -> dict[str, Any]:
+def make_event(node: str, event_type: str, message: str, **metadata: Any) -> dict[str, Any]:  # noqa: ANN401
     """Create a normalized event payload."""
-    return LabEvent(node=node, event_type=event_type, message=message, metadata=metadata).model_dump()
+    event = LabEvent(node=node, event_type=event_type, message=message, metadata=metadata)
+    return event.model_dump()

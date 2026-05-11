@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Any
+import sqlite3
+from pathlib import Path
 
 
-def build_checkpointer(kind: str = "memory", database_url: str | None = None) -> Any | None:
+def build_checkpointer(kind: str = "memory", database_url: str | None = None) -> object | None:
     """Return a LangGraph checkpointer.
 
-    TODO(student): add SQLite/Postgres support for the extension track.
-    The starter uses MemorySaver so the lab can run without infrastructure.
+    - ``memory``: in-process ``MemorySaver`` for fast tests.
+    - ``sqlite``: durable checkpoints with WAL (extension / crash-resume evidence).
+    - ``postgres``: optional enterprise backend when the extra package is installed.
     """
     if kind == "none":
         return None
@@ -21,12 +23,20 @@ def build_checkpointer(kind: str = "memory", database_url: str | None = None) ->
         try:
             from langgraph.checkpoint.sqlite import SqliteSaver
         except ImportError as exc:
-            raise RuntimeError("SQLite checkpointer requires: pip install langgraph-checkpoint-sqlite") from exc
-        return SqliteSaver.from_conn_string(database_url or "checkpoints.db")
+            msg = "SQLite checkpointer requires: pip install langgraph-checkpoint-sqlite"
+            raise RuntimeError(msg) from exc
+        path = database_url or "checkpoints.db"
+        db_path = Path(path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(str(db_path), check_same_thread=False)
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.commit()
+        return SqliteSaver(conn)
     if kind == "postgres":
         try:
-            from langgraph.checkpoint.postgres import PostgresSaver
+            from langgraph.checkpoint.postgres import PostgresSaver  # noqa: I001
         except ImportError as exc:
-            raise RuntimeError("Postgres checkpointer requires: pip install langgraph-checkpoint-postgres") from exc
+            msg = "Postgres checkpointer requires: pip install langgraph-checkpoint-postgres"
+            raise RuntimeError(msg) from exc
         return PostgresSaver.from_conn_string(database_url or "")
     raise ValueError(f"Unknown checkpointer kind: {kind}")

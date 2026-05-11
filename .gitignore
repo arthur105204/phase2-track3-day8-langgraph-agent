@@ -29,6 +29,10 @@ reports/lab_report.md
 checkpoints.db
 checkpoints.db-wal
 checkpoints.db-shm
+outputs/*.db
+outputs/*.db-wal
+outputs/*.db-shm
+outputs/dead_letter.jsonl
 
 # Testing
 .pytest_cache/

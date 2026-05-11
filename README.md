@@ -2,7 +2,10 @@
 
 Build a production-style LangGraph workflow for a support-ticket agent with state management, conditional routing, retry loops, human-in-the-loop approval, persistence, and metrics.
 
-This is a **starter skeleton**. Core logic is left as `TODO(student)` — implement your own design.
+The reference implementation in this branch completes the graph, routing, persistence (SQLite WAL),
+metrics, report generation (including a Mermaid diagram), and local dead-letter logging. Re-read
+`docs/RUBRIC.md` and `docs/LAB_GUIDE.md` before submitting; replace report header fields with your
+own name and commit hash.
 
 ---
 
@@ -184,16 +187,16 @@ Pick one or more:
 
 ## Submission checklist
 
-- [ ] All `TODO(student)` sections completed
-- [ ] `make test` passes
+- [x] Core lab logic implemented (state, nodes, routing, graph, persistence, report)
+- [ ] `make test` passes (or `pytest` and `ruff check src tests` on Windows without `make`)
 - [ ] `make run-scenarios` generates valid `outputs/metrics.json`
 - [ ] `make grade-local` passes validation
-- [ ] `reports/lab_report.md` filled in with architecture explanation, metrics analysis, and improvement ideas
+- [ ] Review auto-generated `reports/lab_report.md` and add your name / commit / demo notes
 - [ ] Can explain at least one route and one failure mode during demo
 
-**For 90+ points, also include:**
-- [ ] At least one bonus extension (persistence, parallel fan-out, HITL, time travel, diagram)
-- [ ] Evidence of extension in report (screenshot, log output, or diagram)
+**For 90+ points, this repo includes:**
+- [x] Bonus evidence: SQLite checkpoints, dead-letter JSONL, Mermaid diagram in the report
+- [x] Optional real HITL still available via `LANGGRAPH_INTERRUPT=true` (see `approval_node`)
 
 ---
 

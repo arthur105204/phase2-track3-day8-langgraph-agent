@@ -6,7 +6,7 @@ that check schema/metrics can run even if students are still debugging graph wir
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from .nodes import (
     answer_node,
@@ -21,26 +21,34 @@ from .nodes import (
     risky_action_node,
     tool_node,
 )
-from .routing import route_after_approval, route_after_classify, route_after_evaluate, route_after_retry
+from .routing import (
+    route_after_approval,
+    route_after_classify,
+    route_after_evaluate,
+    route_after_retry,
+)
 from .state import AgentState
 
 
-def build_graph(checkpointer: Any | None = None):
+def build_graph(checkpointer: object | None = None) -> Any:  # noqa: ANN401
     """Build and compile the LangGraph workflow.
 
-    TODO(student): review the architecture and modify nodes/edges only with a clear reason.
-    Required behaviors:
-    - intake -> classify (normalization + routing)
-    - classify routes to answer/tool/clarify/risky/retry
-    - tool -> evaluate creates the retry loop (slide: "done?" check)
-    - risky path requires approval before tool/action
-    - retry loop bounded by max_attempts -> dead_letter on exhaustion
-    - all paths eventually reach finalize -> END
+    Flow (all paths end at ``finalize``):
+
+    - ``START -> intake -> classify`` then route by ``route_after_classify``.
+    - ``simple -> answer -> finalize -> END``
+    - ``tool -> evaluate`` then ``answer`` or ``retry`` loop bounded by ``max_attempts``.
+    - ``missing_info -> clarify -> finalize -> END``
+    - ``risky -> risky_action -> approval`` then ``tool`` or ``clarify``;
+      then ``evaluate`` loop like tool.
+    - ``error -> retry`` first, then ``tool -> evaluate`` with bounded retries,
+      else ``dead_letter``.
     """
     try:
         from langgraph.graph import END, START, StateGraph
     except Exception as exc:  # pragma: no cover - helpful install error
-        raise RuntimeError("LangGraph is required. Run: pip install -e '.[dev]' or pip install langgraph") from exc
+        msg = "LangGraph is required. Run: pip install -e '.[dev]' or pip install langgraph"
+        raise RuntimeError(msg) from exc
 
     graph = StateGraph(AgentState)
     graph.add_node("intake", intake_node)
@@ -68,4 +76,4 @@ def build_graph(checkpointer: Any | None = None):
     graph.add_edge("dead_letter", "finalize")
     graph.add_edge("finalize", END)
 
-    return graph.compile(checkpointer=checkpointer)
+    return graph.compile(checkpointer=cast(Any, checkpointer))

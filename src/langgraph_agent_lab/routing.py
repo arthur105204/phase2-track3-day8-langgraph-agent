@@ -8,9 +8,9 @@ from .state import AgentState, Route
 def route_after_classify(state: AgentState) -> str:
     """Map classified route to the next graph node.
 
-    TODO(student): handle unknown routes safely and update tests for edge cases.
+    Unknown routes fall through to ``answer`` so the graph always progresses.
     """
-    route = state.get("route", Route.SIMPLE.value)
+    route = state.get("route") or Route.SIMPLE.value
     mapping = {
         Route.SIMPLE.value: "answer",
         Route.TOOL.value: "tool",
@@ -22,30 +22,23 @@ def route_after_classify(state: AgentState) -> str:
 
 
 def route_after_retry(state: AgentState) -> str:
-    """Decide whether to retry, fallback, or dead-letter.
-
-    TODO(student): implement bounded retry and dead-letter routing.
-    """
+    """Decide whether to retry the tool, or escalate to dead-letter."""
     if int(state.get("attempt", 0)) >= int(state.get("max_attempts", 3)):
         return "dead_letter"
     return "tool"
 
 
 def route_after_evaluate(state: AgentState) -> str:
-    """Decide whether tool result is satisfactory or needs retry.
-
-    This is the 'done?' check that enables retry loops — a key LangGraph advantage over LCEL.
-    TODO(student): replace heuristic with LLM-as-judge or structured validation.
-    """
+    """Branch after tool evaluation (structured ``evaluation_result``)."""
     if state.get("evaluation_result") == "needs_retry":
         return "retry"
     return "answer"
 
 
 def route_after_approval(state: AgentState) -> str:
-    """Continue only if approved.
-
-    TODO(student): support reject/edit outcomes.
-    """
+    """Continue to tool on approval or edit; send rejections back to clarify."""
     approval = state.get("approval") or {}
-    return "tool" if approval.get("approved") else "clarify"
+    action = str(approval.get("action", "approve"))
+    if action == "reject" or not approval.get("approved", False):
+        return "clarify"
+    return "tool"

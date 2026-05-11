@@ -1,3 +1,6 @@
 scenarios_path: data/sample/scenarios.jsonl
-checkpointer: memory
+checkpointer: sqlite
+database_url: outputs/checkpoints.db
+# Remove SQLite files before a batch run so metrics/events are not accumulated across runs.
+reset_sqlite_before_run: true
 report_path: reports/lab_report.md
