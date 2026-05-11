@@ -2,9 +2,9 @@
 
 ## 1. Team / student
 
-- Name: (see submission metadata)
-- Repo/commit: (local lab workspace)
-- Date: 2026-05-11 04:29 UTC
+- Name: Nguyễn Mạnh Phú
+- Repo/commit: https://github.com/arthur105204/phase2-track3-day8-langgraph-agent
+- Date: 11/05/2026
 
 ## 2. Architecture
 
